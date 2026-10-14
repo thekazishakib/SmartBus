@@ -1,0 +1,5 @@
+# Python >= 3.11. Application and tests use the standard library only.
+# SQLite is provided by Python's built-in sqlite3 module.
+# Microsoft Edge is an external requirement for PDF export on Windows.
+# Microsoft Excel is used for editing workbooks. R analysis is optional.
+# English-only interface, workbooks and reports use system fonts; no font install is needed.
