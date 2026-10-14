@@ -10,7 +10,7 @@
 
 ## Project overview
 
-SmartBus is my AI-assisted finance automation learning project for daily bus trips and counter accounts. It connects trip records with ticket sales, commission, deposits and outstanding balances, then preserves reviewed results in a local ledger.
+SmartBus is a practical finance automation project for daily bus trips and counter accounts. It connects trip records with ticket sales, commission, deposits and outstanding balances, then preserves reviewed results in a local ledger.
 
 The project uses Excel for familiar daily data entry, Python for accounting and reporting, SQLite for versioned records, and a small HTML/CSS/JavaScript control panel for the operator workflow. It runs on one computer and does not need an online account or a cloud database.
 
@@ -250,7 +250,7 @@ The [GitHub setup guide](docs/GITHUB_SETUP.md) covers repository upload, topics,
 
 ## Development notes
 
-My current strength is Excel, and I am developing my Python skills. I directed the project and feature choices with OpenAI ChatGPT/Codex assistance for code generation, debugging, tests and documentation. This repository demonstrates an AI-assisted finance project; it is not a claim that I independently wrote all the Python code. No real-company adoption, financial outcomes or time savings are claimed by the demonstration data.
+Developed by Kazi Shakib with support from ChatGPT/Codex, an AI assistant. I guided the project direction and feature choices; the assistant helped with code generation, debugging, tests and documentation. No real-company adoption, financial outcomes or time savings are claimed by the demonstration data.
 
 See the [owner learning and showcase guide](docs/OWNER_GUIDE.md) for a practice demo, a focused Python learning path and a way to document personal contributions. The [final package verification](docs/FINAL_PACKAGE_VERIFICATION.md) distinguishes freshly rerun checks from desktop steps still requiring manual acceptance.
 

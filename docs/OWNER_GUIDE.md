@@ -1,12 +1,12 @@
 # Owner learning and showcase guide
 
-SmartBus 1.2.1 is an AI-assisted finance learning project by Kazi Shakib. Excel is the owner's current strength; Python proficiency is developing. This guide is a practice plan, not evidence that the tasks below have already been completed.
+SmartBus 1.2.1 is a finance automation project by Kazi Shakib. This guide builds on an Excel background and introduces the Python needed to understand and maintain the project. It is a practice plan, not evidence that the tasks below have already been completed.
 
 ## Describe the project accurately
 
 Suggested introduction, to adapt to your actual contributions:
 
-> I directed an AI-assisted bus-revenue reconciliation project using Excel, Python and SQLite. My current strength is Excel, and I am learning to read and validate the Python calculations. ChatGPT/Codex assisted with implementation, debugging, tests and documentation. The demonstration uses fictional data.
+> I developed SmartBus with support from ChatGPT/Codex, an AI assistant. I guided the project direction and feature choices, while the assistant helped with implementation, debugging, tests and documentation. SmartBus uses Excel, Python and SQLite to reconcile bus revenue and counter receipts. The demonstration uses fictional data.
 
 The application also has a local HTML/CSS/JavaScript control panel, SQLite storage and optional R analysis. Do not describe this version as using only Python and Excel. It reconciles revenue and receipts; it does not calculate operating profit or provide a full general ledger. It is not an official Hanif Enterprise system and contains no established Hanif deployment or business-impact evidence.
 

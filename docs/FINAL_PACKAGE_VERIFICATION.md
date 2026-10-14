@@ -4,7 +4,7 @@ Prepared on 14 October 2026 for SmartBus 1.2.1. This is a local distribution che
 
 ## Finalization scope
 
-The final package adds clearer AI-assistance and learning-context wording, a practical owner guide, browser-upload instructions and this verification record. Application Python sources, the launcher, optional R script and all Excel fixtures were compared with the supplied SmartBus 1.2.1 folder and are byte-for-byte unchanged. The application version remains 1.2.1. README was regenerated from its editable template.
+The final package adds concise author-and-assistant attribution, a practical owner guide, browser-upload instructions and this verification record. Application Python sources, the launcher, optional R script and all Excel fixtures were compared with the supplied SmartBus 1.2.1 folder and are byte-for-byte unchanged. The application version remains 1.2.1. README was regenerated from its editable template. A subsequent wording-only revision simplified the attribution; no application code or workbook fixture changed after the test run below.
 
 ## Fresh checks
 
