@@ -2,6 +2,8 @@
 
 ## 1.2.1 - 2026-10-14
 
+- Final distribution preparation: clarified AI assistance and the owner's learning context, added an owner guide and browser publishing instructions, and recorded fresh final-package checks. Application code and workbook fixtures remain unchanged in this preparation.
+
 - Formatted Python code with Ruff and added pinned development requirements plus CI formatting/lint checks.
 - Renamed input normalization to `normalize_inputs`, removed the internal `COMPANY_V4` handshake and clarified workbook-format errors while retaining `AUTO_V6`.
 - Removed unused collection fee/cost inputs and zero-expense arithmetic; retained the report/snapshot output schema for existing records.

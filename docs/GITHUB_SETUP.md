@@ -17,6 +17,21 @@ Suggested topics: `python`, `excel`, `sqlite`, `finance`, `accounting`, `reconci
 
 ## Upload the extracted contents
 
+### Browser upload without Git commands
+
+1. Extract the final ZIP. Open the inner `SmartBus` folder; `README.md` should be directly inside it.
+2. Open the new GitHub repository and choose the upload-existing-files link, or **Add file → Upload files**.
+3. Drag the contents of the inner folder into the upload area, including `assets`, `docs`, `tools`, `.github`, `.gitignore` and `.gitattributes`. This package has fewer than 100 files and no file approaches the 25 MiB browser limit.
+4. Check the displayed paths: `README.md` must be at the repository root, not `SmartBus/README.md` inside another folder. Check dot-prefixed files and both workflow files were included.
+5. Use a commit message such as `Publish SmartBus v1.2.1` and finish GitHub's commit flow. If a branch or pull request is required, complete that flow before checking the default branch.
+6. Confirm the source files and rendered README appear. Uploading only the ZIP does not create a browsable source repository.
+
+Upload this clean extracted release before running it. Browser uploads do not apply `.gitignore` to filter selected files; do not drag a used working folder containing accounts or backups.
+
+GitHub's [official file upload instructions](https://docs.github.com/en/repositories/working-with-files/managing-files/adding-a-file-to-a-repository) describe the current interface and limits.
+
+### Command-line alternative
+
 Run these commands inside the extracted `SmartBus` folder after creating the empty repository:
 
 ```text
@@ -55,3 +70,7 @@ In GitHub's **Releases**, draft a release with tag `v1.2.1`. Use the current rel
 ## License and attribution
 
 The repository includes the MIT License, copyright 2026 Kazi Shakib, and explicit third-party notices. Keep both files in the source and release archive. The MIT License does not grant rights to redistribute Microsoft products or other external dependencies under MIT.
+
+## After the first release
+
+Read the [owner learning and showcase guide](OWNER_GUIDE.md). Confirm the source repository, Actions results, downloadable release and your ability to demonstrate the fictional account. Explain AI assistance and your contributions accurately. Publication is not evidence of professional Python proficiency or real-company adoption.
