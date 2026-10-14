@@ -1,5 +1,5 @@
-# Optional R analysis of a period's trips CSV. Base R, Cairo and installed Noto font.
-# Rscript analyze.R reports/HeadCounter_..._trips.csv analysis
+# Optional R analysis of a period's trips CSV. Base R with Cairo and system fonts.
+# Rscript analyze.R reports/SmartBus_..._trips.csv analysis
 args <- commandArgs(trailingOnly=TRUE)
 if(length(args)<1) stop("Choose the trips CSV saved with the PDF.")
 out <- if(length(args)>1) args[2] else "analysis"
@@ -16,7 +16,7 @@ route$seat_use <- route$seats/route$capacity
 write.csv(daily,file.path(out,"daily_summary.csv"),row.names=FALSE,na="")
 write.csv(route,file.path(out,"route_summary.csv"),row.names=FALSE,na="")
 write.csv(d[d$status!="Matched",],file.path(out,"trips_to_check.csv"),row.names=FALSE,na="")
-cairo_pdf(file.path(out,"route_analysis.pdf"),width=11,height=7,family="Noto Serif Bengali")
+cairo_pdf(file.path(out,"route_analysis.pdf"),width=11,height=7,family="sans")
 barplot(route$gross,names.arg=route$route,col="#40566D",las=2,main="Fare by route",ylab="Taka")
 plot(daily$day,daily$gross,type="b",col="#59646F",main="Daily fare (recorded days)",xlab="Date",ylab="Taka")
 dev.off()

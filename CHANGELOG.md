@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.2.1 - 2026-10-14
+
+- Formatted Python code with Ruff and added pinned development requirements plus CI formatting/lint checks.
+- Renamed input normalization to `normalize_inputs`, removed the internal `COMPANY_V4` handshake and clarified workbook-format errors while retaining `AUTO_V6`.
+- Removed unused collection fee/cost inputs and zero-expense arithmetic; retained the report/snapshot output schema for existing records.
+- Extracted shared value/date and workbook-reading helpers into `values.py` and `xlsx_io.py`, removing the accounting module's circular dependency.
+- Added OS-aware file/folder opening with a saved-path response when desktop launching fails.
+- Renamed newly generated `HeadCounter_` report filenames to `SmartBus_` and changed optional R chart text to the system sans-serif font.
+- Kept the ledger schema, closed snapshots, fixed capacity/commission rules and standard-library runtime unchanged.
+
+
 ## 1.2.0 - 2026-10-14
 
 - Added browser-printable reports with Print / Save as PDF and an export guide.
@@ -55,4 +66,3 @@ This is a single-computer application. Actor labels are not authentication, and 
 - Preserved the existing workbook theme and accounting behavior.
 - Documented local acceptance checks and known workflow limits.
 - That package did not create or upload a remote repository.
-

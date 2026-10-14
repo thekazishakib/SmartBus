@@ -3,25 +3,28 @@
 Excel remains the input surface. A closed revision is the source for final reports.
 Operator names are attribution labels, not authenticated identities.
 """
+
 from __future__ import annotations
 
 import argparse
-from contextlib import closing, contextmanager
-from datetime import date, datetime, timezone
-from decimal import Decimal
 import hashlib
 import json
 import os
-from pathlib import Path
 import re
 import shutil
 import sqlite3
 import tempfile
 import uuid
-from zipfile import ZIP_DEFLATED, ZipFile
 import xml.etree.ElementTree as ET
+from contextlib import closing, contextmanager
+from datetime import date, datetime, timezone
+from decimal import Decimal
+from pathlib import Path
+from zipfile import ZIP_DEFLATED, ZipFile
 
-VERSION = "1.2.0"
+from project_profile import APP_VERSION
+
+VERSION = APP_VERSION
 SCHEMA_VERSION = 1
 DAILY_NAME = re.compile(r"^Daily_(\d{4}-\d{2}-\d{2})_en\.xlsx$")
 
@@ -52,8 +55,14 @@ def _decode(value):
 
 
 def serialize(book):
-    return json.dumps(book, default=_encode, ensure_ascii=False, sort_keys=True,
-                      separators=(",", ":"), allow_nan=False)
+    return json.dumps(
+        book,
+        default=_encode,
+        ensure_ascii=False,
+        sort_keys=True,
+        separators=(",", ":"),
+        allow_nan=False,
+    )
 
 
 def deserialize(raw):
@@ -73,13 +82,18 @@ def _day(value):
 
 def _review_errors(book):
     from daily_system import validate_book
+
     validate_book(book)
     messages = []
     for trip in book["trips"]:
         if not trip["counter_count"]:
-            messages.append(f"Trip {trip['trip']}: enter its counter sales before review.")
+            messages.append(
+                f"Trip {trip['trip']}: enter its counter sales before review."
+            )
         if trip["pending_counters"]:
-            messages.append(f"Trip {trip['trip']}: received deposits are blank; enter known zero explicitly.")
+            messages.append(
+                f"Trip {trip['trip']}: received deposits are blank; enter known zero explicitly."
+            )
     if messages:
         raise ValueError("Review blocked: " + " ".join(messages))
 
@@ -91,6 +105,7 @@ def freeze_workbook(path, book, backup_folder):
     New untouched formula rows continue to work with the current masters.
     """
     import daily_system as daily
+
     path = Path(path)
     before_hash = digest(path)
     backup_folder = Path(backup_folder)
@@ -100,22 +115,40 @@ def freeze_workbook(path, book, backup_folder):
     with ZipFile(path) as archive:
         files = {name: archive.read(name) for name in archive.namelist()}
     parts = daily.workbook_parts(files)
-    trees = {name: ET.fromstring(files[parts[name]])
-             for name in ("Settings", "Trips", "Collections")}
-    styles = {name: {c.get("r"): c.get("s") for c in tree.findall(".//s:c", daily.NS)}
-              for name, tree in trees.items()}
+    trees = {
+        name: ET.fromstring(files[parts[name]])
+        for name in ("Settings", "Trips", "Collections")
+    }
+    styles = {
+        name: {c.get("r"): c.get("s") for c in tree.findall(".//s:c", daily.NS)}
+        for name, tree in trees.items()
+    }
     raw = daily.read_book(path)
-    trip_rows = [r for r in range(6, 106) if raw["Trips"].get(f"B{r}") not in (None, "")]
+    trip_rows = [
+        r for r in range(6, 106) if raw["Trips"].get(f"B{r}") not in (None, "")
+    ]
     for row, trip in zip(trip_rows, book["trips"]):
-        for column, value in (("A", trip["trip"]), ("D", trip["route"]), ("G", trip["driver"])):
+        for column, value in (
+            ("A", trip["trip"]),
+            ("D", trip["route"]),
+            ("G", trip["driver"]),
+        ):
             daily.set_cell(trees["Trips"], f"{column}{row}", value)
-    line_rows = [r for r in range(6, 506)
-                 if any(raw["Collections"].get(f"{c}{r}") not in (None, "") for c in "EGM")]
+    line_rows = [
+        r
+        for r in range(6, 506)
+        if any(raw["Collections"].get(f"{c}{r}") not in (None, "") for c in "EGM")
+    ]
     if len(line_rows) != len(book["lines"]):
-        raise ValueError("Collection rows could not be pinned safely. Check all collection entries.")
+        raise ValueError(
+            "Collection rows could not be pinned safely. Check all collection entries."
+        )
     for row, line in zip(line_rows, book["lines"]):
-        for column, value in (("D", line["trip"]), ("F", line["kind"]),
-                              ("H", float(line["fare"]) if line["fare"] is not None else None)):
+        for column, value in (
+            ("D", line["trip"]),
+            ("F", line["kind"]),
+            ("H", float(line["fare"]) if line["fare"] is not None else None),
+        ):
             daily.set_cell(trees["Collections"], f"{column}{row}", value)
     daily.set_cell(trees["Settings"], "B18", "SMARTBUS_FROZEN_V1")
     for name, tree in trees.items():
@@ -130,8 +163,12 @@ def freeze_workbook(path, book, backup_folder):
     if calc is None:
         calc = ET.SubElement(workbook, daily.tag("calcPr"))
     calc.attrib.update(fullCalcOnLoad="1", forceFullCalc="1", calcMode="auto")
-    files["xl/workbook.xml"] = ET.tostring(workbook, encoding="utf-8", xml_declaration=True)
-    handle, temporary = tempfile.mkstemp(prefix=".smartbus_", suffix=".xlsx", dir=path.parent)
+    files["xl/workbook.xml"] = ET.tostring(
+        workbook, encoding="utf-8", xml_declaration=True
+    )
+    handle, temporary = tempfile.mkstemp(
+        prefix=".smartbus_", suffix=".xlsx", dir=path.parent
+    )
     os.close(handle)
     staged = Path(temporary)
     try:
@@ -140,12 +177,24 @@ def freeze_workbook(path, book, backup_folder):
                 archive.writestr(name, data)
         verified = daily.calculate(staged)
         # Compare the complete calculated accounts, not just the grand total.
-        original = {k: v for k, v in book.items() if k not in ("path", "route_list", "bus_master", "counter_master")}
-        after = {k: v for k, v in verified.items() if k not in ("path", "route_list", "bus_master", "counter_master")}
+        original = {
+            k: v
+            for k, v in book.items()
+            if k not in ("path", "route_list", "bus_master", "counter_master")
+        }
+        after = {
+            k: v
+            for k, v in verified.items()
+            if k not in ("path", "route_list", "bus_master", "counter_master")
+        }
         if serialize(original) != serialize(after):
-            raise ValueError("Pinning changed calculated accounts; import cancelled. Original workbook retained.")
+            raise ValueError(
+                "Pinning changed calculated accounts; import cancelled. Original workbook retained."
+            )
         if digest(path) != before_hash:
-            raise ValueError("Workbook changed during import. Save and close Excel, then retry.")
+            raise ValueError(
+                "Workbook changed during import. Save and close Excel, then retry."
+            )
         os.replace(staged, path)
     finally:
         staged.unlink(missing_ok=True)
@@ -158,6 +207,7 @@ class LedgerStore:
     def __init__(self, root=None, *, create=True):
         if root is None:
             from daily_system import ROOT
+
             root = ROOT
         self.root = Path(root).resolve()
         self.data_dir = self.root / "data"
@@ -176,7 +226,9 @@ class LedgerStore:
             with self._guard(), self._connect() as connection:
                 version = connection.execute("PRAGMA user_version").fetchone()[0]
                 if version not in (0, SCHEMA_VERSION):
-                    raise ValueError("This ledger was created by a different application version.")
+                    raise ValueError(
+                        "This ledger was created by a different application version."
+                    )
                 connection.executescript("""
                     CREATE TABLE IF NOT EXISTS days (
                         day TEXT PRIMARY KEY,
@@ -232,12 +284,16 @@ class LedgerStore:
             try:
                 if os.name == "nt":
                     import msvcrt
+
                     msvcrt.locking(lock.fileno(), msvcrt.LK_NBLCK, 1)
                 else:
                     import fcntl
+
                     fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
             except OSError as exc:
-                raise ValueError("Ledger is busy. Wait for the current operation and retry.") from exc
+                raise ValueError(
+                    "Ledger is busy. Wait for the current operation and retry."
+                ) from exc
             try:
                 yield
             finally:
@@ -264,56 +320,96 @@ class LedgerStore:
     def _event(connection, actor, action, day=None, revision=None, **details):
         connection.execute(
             "INSERT INTO audit_events(occurred_at,actor,action,day,revision,details_json) VALUES(?,?,?,?,?,?)",
-            (utc_now(), actor, action, day, revision, json.dumps(details, ensure_ascii=False, sort_keys=True)))
+            (
+                utc_now(),
+                actor,
+                action,
+                day,
+                revision,
+                json.dumps(details, ensure_ascii=False, sort_keys=True),
+            ),
+        )
 
     @staticmethod
     def _get_day(connection, day):
-        row = connection.execute("SELECT * FROM days WHERE day=?", (_day(day),)).fetchone()
+        row = connection.execute(
+            "SELECT * FROM days WHERE day=?", (_day(day),)
+        ).fetchone()
         if row is None:
-            raise ValueError("Import this daily workbook before reviewing or closing it.")
+            raise ValueError(
+                "Import this daily workbook before reviewing or closing it."
+            )
         return row
 
     @staticmethod
     def _snapshot(connection, day, revision):
-        row = connection.execute("SELECT * FROM revisions WHERE day=? AND revision=?", (day, revision)).fetchone()
+        row = connection.execute(
+            "SELECT * FROM revisions WHERE day=? AND revision=?", (day, revision)
+        ).fetchone()
         if row is None:
-            raise ValueError("This revision has no imported workbook. Import the corrected file first.")
+            raise ValueError(
+                "This revision has no imported workbook. Import the corrected file first."
+            )
         raw = row["snapshot_json"]
         if hashlib.sha256(raw.encode("utf-8")).hexdigest() != row["snapshot_sha256"]:
-            raise ValueError(f"Ledger snapshot integrity failed for {day}; restore a verified backup.")
+            raise ValueError(
+                f"Ledger snapshot integrity failed for {day}; restore a verified backup."
+            )
         return deserialize(raw), row
 
     def _source_unchanged(self, row, revision):
         source = self.root / "daily" / row["source_name"]
         if not source.is_file() or digest(source) != revision["source_sha256"]:
-            raise ValueError("Source workbook changed or is missing. Save, close Excel and import again before review/close.")
+            raise ValueError(
+                "Source workbook changed or is missing. Save, close Excel and import again before review/close."
+            )
 
     def import_workbook(self, path, actor="Local operator", reason=""):
         from daily_system import calculate, validate_book
+
         actor = _label(actor)
         path = Path(path).resolve()
         daily_folder = (self.root / "daily").resolve()
         match = DAILY_NAME.fullmatch(path.name)
         if path.parent != daily_folder or not match or not path.is_file():
-            raise ValueError("Import a Daily_YYYY-MM-DD_en.xlsx file from this project's daily folder.")
+            raise ValueError(
+                "Import a Daily_YYYY-MM-DD_en.xlsx file from this project's daily folder."
+            )
         if path.with_name("~$" + path.name).exists():
-            raise ValueError("This workbook is open in Excel. Save and close it before importing.")
+            raise ValueError(
+                "This workbook is open in Excel. Save and close it before importing."
+            )
         day = _day(match[1])
         with self._guard(), self._connect() as connection:
-            current = connection.execute("SELECT * FROM days WHERE day=?", (day,)).fetchone()
+            current = connection.execute(
+                "SELECT * FROM days WHERE day=?", (day,)
+            ).fetchone()
             source_hash = digest(path)
             if current is not None:
-                old = connection.execute("SELECT source_sha256 FROM revisions WHERE day=? AND revision=?",
-                                         (day, current["revision"])).fetchone()
+                old = connection.execute(
+                    "SELECT source_sha256 FROM revisions WHERE day=? AND revision=?",
+                    (day, current["revision"]),
+                ).fetchone()
                 if current["source_name"] != path.name:
-                    raise ValueError("A different language/file is already registered for this date.")
+                    raise ValueError(
+                        "A different language/file is already registered for this date."
+                    )
                 if old and old["source_sha256"] == source_hash:
-                    return dict(day=day, status=current["status"], revision=current["revision"], unchanged=True)
+                    return dict(
+                        day=day,
+                        status=current["status"],
+                        revision=current["revision"],
+                        unchanged=True,
+                    )
                 if current["status"] == "closed":
-                    raise ValueError("This day is closed. Start a correction with a reason before importing changes.")
+                    raise ValueError(
+                        "This day is closed. Start a correction with a reason before importing changes."
+                    )
             book = calculate(path)
             if book["day"] != day or book["dataset"] != "LIVE":
-                raise ValueError("Only LIVE workbooks whose internal date matches the filename can be imported.")
+                raise ValueError(
+                    "Only LIVE workbooks whose internal date matches the filename can be imported."
+                )
             validate_book(book)
             self._backup_unlocked(connection)
             workbook_backup = freeze_workbook(path, book, self.backups / "workbooks")
@@ -321,31 +417,84 @@ class LedgerStore:
             book = calculate(path)
             validate_book(book)
             now = utc_now()
-            revision = (current["revision"] + 1 if old else current["revision"]) if current else 1
-            previous_ids = {r["trip_label"]: r["record_id"] for r in connection.execute(
-                "SELECT trip_label,record_id FROM trips WHERE day=? ORDER BY revision", (day,))}
+            revision = (
+                (current["revision"] + 1 if old else current["revision"])
+                if current
+                else 1
+            )
+            previous_ids = {
+                r["trip_label"]: r["record_id"]
+                for r in connection.execute(
+                    "SELECT trip_label,record_id FROM trips WHERE day=? ORDER BY revision",
+                    (day,),
+                )
+            }
             for trip in book["trips"]:
                 trip["record_id"] = previous_ids.get(trip["trip"]) or str(uuid.uuid4())
             book["path"] = str(path)
             raw = serialize(book)
             if current:
-                connection.execute("UPDATE days SET status='draft',revision=?,updated_at=? WHERE day=?", (revision, now, day))
+                connection.execute(
+                    "UPDATE days SET status='draft',revision=?,updated_at=? WHERE day=?",
+                    (revision, now, day),
+                )
             else:
-                connection.execute("INSERT INTO days(day,status,revision,source_name,updated_at) VALUES(?,'draft',?,?,?)",
-                                   (day, revision, path.name, now))
-            connection.execute("INSERT INTO revisions(day,revision,source_sha256,snapshot_json,snapshot_sha256,imported_at,actor) VALUES(?,?,?,?,?,?,?)",
-                               (day, revision, source_hash, raw, hashlib.sha256(raw.encode("utf-8")).hexdigest(), now, actor))
+                connection.execute(
+                    "INSERT INTO days(day,status,revision,source_name,updated_at) VALUES(?,'draft',?,?,?)",
+                    (day, revision, path.name, now),
+                )
+            connection.execute(
+                "INSERT INTO revisions(day,revision,source_sha256,snapshot_json,snapshot_sha256,imported_at,actor) VALUES(?,?,?,?,?,?,?)",
+                (
+                    day,
+                    revision,
+                    source_hash,
+                    raw,
+                    hashlib.sha256(raw.encode("utf-8")).hexdigest(),
+                    now,
+                    actor,
+                ),
+            )
             for trip in book["trips"]:
-                connection.execute("INSERT INTO trips VALUES(?,?,?,?,?,?,?,?,?)",
-                                   (day, revision, trip["record_id"], trip["trip"], str(trip["gross"]), str(trip["commission"]),
-                                    str(trip["due"]), str(trip["actual"]) if trip["actual"] is not None else None, str(trip["outstanding"])))
+                connection.execute(
+                    "INSERT INTO trips VALUES(?,?,?,?,?,?,?,?,?)",
+                    (
+                        day,
+                        revision,
+                        trip["record_id"],
+                        trip["trip"],
+                        str(trip["gross"]),
+                        str(trip["commission"]),
+                        str(trip["due"]),
+                        str(trip["actual"]) if trip["actual"] is not None else None,
+                        str(trip["outstanding"]),
+                    ),
+                )
             trip_ids = {trip["trip"]: trip["record_id"] for trip in book["trips"]}
             for group in book["counter_groups"]:
-                connection.execute("INSERT INTO settlements VALUES(?,?,?,?,?,?,?)",
-                                   (day, revision, trip_ids[group["trip"]], str(group["counter"]),
-                                    str(group["due"]), str(group["actual"]) if group["actual"] is not None else None, str(group["outstanding"])))
-            self._event(connection, actor, "import", day, revision, source_name=path.name,
-                        source_sha256=source_hash, workbook_backup=workbook_backup.name, reason=str(reason)[:1000])
+                connection.execute(
+                    "INSERT INTO settlements VALUES(?,?,?,?,?,?,?)",
+                    (
+                        day,
+                        revision,
+                        trip_ids[group["trip"]],
+                        str(group["counter"]),
+                        str(group["due"]),
+                        str(group["actual"]) if group["actual"] is not None else None,
+                        str(group["outstanding"]),
+                    ),
+                )
+            self._event(
+                connection,
+                actor,
+                "import",
+                day,
+                revision,
+                source_name=path.name,
+                source_sha256=source_hash,
+                workbook_backup=workbook_backup.name,
+                reason=str(reason)[:1000],
+            )
         return dict(day=day, status="draft", revision=revision, unchanged=False)
 
     def review_day(self, day, actor="Local operator"):
@@ -357,7 +506,10 @@ class LedgerStore:
             book, revision = self._snapshot(connection, row["day"], row["revision"])
             self._source_unchanged(row, revision)
             _review_errors(book)
-            connection.execute("UPDATE days SET status='reviewed',updated_at=? WHERE day=?", (utc_now(), row["day"]))
+            connection.execute(
+                "UPDATE days SET status='reviewed',updated_at=? WHERE day=?",
+                (utc_now(), row["day"]),
+            )
             self._event(connection, actor, "review", row["day"], row["revision"])
         return dict(day=row["day"], status="reviewed", revision=row["revision"])
 
@@ -372,8 +524,14 @@ class LedgerStore:
             _review_errors(book)
             self._backup_unlocked(connection)
             now = utc_now()
-            connection.execute("UPDATE days SET status='closed',published_revision=revision,updated_at=? WHERE day=?", (now, row["day"]))
-            connection.execute("UPDATE revisions SET closed_at=? WHERE day=? AND revision=?", (now, row["day"], row["revision"]))
+            connection.execute(
+                "UPDATE days SET status='closed',published_revision=revision,updated_at=? WHERE day=?",
+                (now, row["day"]),
+            )
+            connection.execute(
+                "UPDATE revisions SET closed_at=? WHERE day=? AND revision=?",
+                (now, row["day"], row["revision"]),
+            )
             self._event(connection, actor, "close", row["day"], row["revision"])
         return dict(day=row["day"], status="closed", revision=row["revision"])
 
@@ -386,11 +544,25 @@ class LedgerStore:
                 raise ValueError("Only a closed day can start a correction.")
             self._backup_unlocked(connection)
             revision = row["revision"] + 1
-            connection.execute("UPDATE days SET status='draft',revision=?,correction_reason=?,updated_at=? WHERE day=?",
-                               (revision, reason, utc_now(), row["day"]))
-            self._event(connection, actor, "begin_correction", row["day"], revision, reason=reason,
-                        previous_published_revision=row["published_revision"])
-        return dict(day=row["day"], status="draft", revision=revision, published_revision=row["published_revision"])
+            connection.execute(
+                "UPDATE days SET status='draft',revision=?,correction_reason=?,updated_at=? WHERE day=?",
+                (revision, reason, utc_now(), row["day"]),
+            )
+            self._event(
+                connection,
+                actor,
+                "begin_correction",
+                row["day"],
+                revision,
+                reason=reason,
+                previous_published_revision=row["published_revision"],
+            )
+        return dict(
+            day=row["day"],
+            status="draft",
+            revision=revision,
+            published_revision=row["published_revision"],
+        )
 
     def status(self):
         if not self.path.is_file():
@@ -399,36 +571,62 @@ class LedgerStore:
             with self._guard(), self._connect() as connection:
                 return self._status_rows(connection)
         except sqlite3.DatabaseError:
-            return [dict(day='', status='recovery_required', revision=0, published_revision=None,
-                         source_name='', stale=True, needs_import=False,
-                         warnings=['Ledger is damaged. Restore a verified backup.'], errors=['Ledger integrity failure.'])]
+            return [
+                dict(
+                    day="",
+                    status="recovery_required",
+                    revision=0,
+                    published_revision=None,
+                    source_name="",
+                    stale=True,
+                    needs_import=False,
+                    warnings=["Ledger is damaged. Restore a verified backup."],
+                    errors=["Ledger integrity failure."],
+                )
+            ]
 
     def _status_rows(self, connection):
         result = []
         for row in connection.execute("SELECT * FROM days ORDER BY day DESC"):
             item = dict(row)
-            rev = connection.execute("SELECT source_sha256 FROM revisions WHERE day=? AND revision=?",
-                                     (row["day"], row["revision"])).fetchone()
+            rev = connection.execute(
+                "SELECT source_sha256 FROM revisions WHERE day=? AND revision=?",
+                (row["day"], row["revision"]),
+            ).fetchone()
             source = self.root / "daily" / row["source_name"]
-            item["stale"] = bool(rev and (not source.is_file() or digest(source) != rev["source_sha256"]))
+            item["stale"] = bool(
+                rev and (not source.is_file() or digest(source) != rev["source_sha256"])
+            )
             item["needs_import"] = rev is None
             item["warnings"] = []
             if item["stale"]:
-                item["warnings"].append("Workbook changed or missing; closed reports retain the published revision.")
+                item["warnings"].append(
+                    "Workbook changed or missing; closed reports retain the published revision."
+                )
             if rev:
                 try:
-                    book, _ = self._snapshot(connection, row['day'], row['revision'])
+                    book, _ = self._snapshot(connection, row["day"], row["revision"])
                 except (ValueError, json.JSONDecodeError) as error:
-                    item['errors'] = [str(error)]
-                    item['warnings'].append('Snapshot integrity failure; restore a verified backup.')
+                    item["errors"] = [str(error)]
+                    item["warnings"].append(
+                        "Snapshot integrity failure; restore a verified backup."
+                    )
                     result.append(item)
                     continue
                 item["trip_count"] = len(book["trips"])
-                item["pending_counters"] = sum(t["pending_counters"] for t in book["trips"])
-                item["gross"] = str(sum((t["gross"] for t in book["trips"]), Decimal(0)))
-                item["outstanding"] = str(sum((t["outstanding"] for t in book["trips"]), Decimal(0)))
+                item["pending_counters"] = sum(
+                    t["pending_counters"] for t in book["trips"]
+                )
+                item["gross"] = str(
+                    sum((t["gross"] for t in book["trips"]), Decimal(0))
+                )
+                item["outstanding"] = str(
+                    sum((t["outstanding"] for t in book["trips"]), Decimal(0))
+                )
                 if item["pending_counters"]:
-                    item["warnings"].append("Blank received deposits must be resolved before review.")
+                    item["warnings"].append(
+                        "Blank received deposits must be resolved before review."
+                    )
             result.append(item)
         return result
 
@@ -438,7 +636,9 @@ class LedgerStore:
             raise ValueError("Audit limit must be between 1 and 1000.")
         with self._guard(), self._connect() as connection:
             result = []
-            for row in connection.execute("SELECT * FROM audit_events ORDER BY id DESC LIMIT ?", (limit,)):
+            for row in connection.execute(
+                "SELECT * FROM audit_events ORDER BY id DESC LIMIT ?", (limit,)
+            ):
                 item = dict(row)
                 item["details"] = json.loads(item.pop("details_json"))
                 result.append(item)
@@ -449,36 +649,65 @@ class LedgerStore:
         if start > end:
             raise ValueError("Start date must be on or before end date.")
         if not self.path.is_file():
-            raise ValueError("Import, review and close your daily files before creating final reports.")
+            raise ValueError(
+                "Import, review and close your daily files before creating final reports."
+            )
         with self._guard(), self._connect() as connection:
             result = []
-            for row in connection.execute("SELECT * FROM days WHERE day BETWEEN ? AND ? AND published_revision IS NOT NULL ORDER BY day", (start, end)):
-                book, rev = self._snapshot(connection, row["day"], row["published_revision"])
-                book["ledger"] = dict(revision=row["published_revision"], status="closed", closed_at=rev["closed_at"],
-                                      source_sha256=rev["source_sha256"], snapshot_sha256=rev["snapshot_sha256"],
-                                      correction_pending=row["status"] != "closed")
+            for row in connection.execute(
+                "SELECT * FROM days WHERE day BETWEEN ? AND ? AND published_revision IS NOT NULL ORDER BY day",
+                (start, end),
+            ):
+                book, rev = self._snapshot(
+                    connection, row["day"], row["published_revision"]
+                )
+                book["ledger"] = dict(
+                    revision=row["published_revision"],
+                    status="closed",
+                    closed_at=rev["closed_at"],
+                    source_sha256=rev["source_sha256"],
+                    snapshot_sha256=rev["snapshot_sha256"],
+                    correction_pending=row["status"] != "closed",
+                )
                 result.append(book)
             return result
 
     @staticmethod
     def _verify_backup(path):
         try:
-            with closing(sqlite3.connect(Path(path).resolve().as_uri() + "?mode=ro", uri=True)) as connection:
+            with closing(
+                sqlite3.connect(Path(path).resolve().as_uri() + "?mode=ro", uri=True)
+            ) as connection:
                 if connection.execute("PRAGMA integrity_check").fetchone()[0] != "ok":
                     raise ValueError("Backup integrity check failed.")
-                if connection.execute("PRAGMA user_version").fetchone()[0] != SCHEMA_VERSION:
+                if (
+                    connection.execute("PRAGMA user_version").fetchone()[0]
+                    != SCHEMA_VERSION
+                ):
                     raise ValueError("Unsupported backup schema version.")
                 if connection.execute("PRAGMA foreign_key_check").fetchall():
                     raise ValueError("Backup contains broken record references.")
                 expected = {"days", "revisions", "trips", "settlements", "audit_events"}
-                tables = {r[0] for r in connection.execute("SELECT name FROM sqlite_master WHERE type='table'")}
+                tables = {
+                    r[0]
+                    for r in connection.execute(
+                        "SELECT name FROM sqlite_master WHERE type='table'"
+                    )
+                }
                 if not expected <= tables:
                     raise ValueError("This is not a SmartBus ledger backup.")
-                for raw, checksum in connection.execute("SELECT snapshot_json,snapshot_sha256 FROM revisions"):
+                for raw, checksum in connection.execute(
+                    "SELECT snapshot_json,snapshot_sha256 FROM revisions"
+                ):
                     if hashlib.sha256(raw.encode("utf-8")).hexdigest() != checksum:
                         raise ValueError("Backup snapshot integrity check failed.")
                     deserialize(raw)
-        except (sqlite3.DatabaseError, json.JSONDecodeError, TypeError, KeyError) as exc:
+        except (
+            sqlite3.DatabaseError,
+            json.JSONDecodeError,
+            TypeError,
+            KeyError,
+        ) as exc:
             raise ValueError("Invalid or damaged SmartBus backup.") from exc
 
     def _backup_unlocked(self, connection):
@@ -504,15 +733,27 @@ class LedgerStore:
         actor = _label(actor)
         name = str(name)
         target = (self.backups / name).resolve()
-        if target.parent != self.backups.resolve() or target.name != name or target.suffix != ".sqlite3" or not target.is_file():
-            raise ValueError("Choose an existing SQLite backup from this project's backups folder.")
+        if (
+            target.parent != self.backups.resolve()
+            or target.name != name
+            or target.suffix != ".sqlite3"
+            or not target.is_file()
+        ):
+            raise ValueError(
+                "Choose an existing SQLite backup from this project's backups folder."
+            )
         with self._guard():
             self._verify_backup(target)
             prior_events = []
             try:
                 with self._connect() as current:
                     safety = self._backup_unlocked(current)
-                    prior_events = [dict(r) for r in current.execute("SELECT * FROM audit_events ORDER BY id")]
+                    prior_events = [
+                        dict(r)
+                        for r in current.execute(
+                            "SELECT * FROM audit_events ORDER BY id"
+                        )
+                    ]
             except (ValueError, sqlite3.DatabaseError):
                 # Recovery must also work when the current database is damaged.
                 # Retain an exact forensic copy; do not list it as a valid backup.
@@ -520,23 +761,59 @@ class LedgerStore:
                 shutil.copy2(self.path, safety)
                 try:
                     with self._connect() as current:
-                        prior_events = [dict(r) for r in current.execute("SELECT * FROM audit_events ORDER BY id")]
+                        prior_events = [
+                            dict(r)
+                            for r in current.execute(
+                                "SELECT * FROM audit_events ORDER BY id"
+                            )
+                        ]
                 except sqlite3.DatabaseError:
                     prior_events = []
-            handle, temporary = tempfile.mkstemp(prefix=".restore_", suffix=".sqlite3", dir=self.data_dir)
+            handle, temporary = tempfile.mkstemp(
+                prefix=".restore_", suffix=".sqlite3", dir=self.data_dir
+            )
             os.close(handle)
             staged = Path(temporary)
             try:
-                with closing(sqlite3.connect(target.as_uri() + "?mode=ro", uri=True)) as source, \
-                        closing(sqlite3.connect(staged)) as destination, destination:
+                with (
+                    closing(
+                        sqlite3.connect(target.as_uri() + "?mode=ro", uri=True)
+                    ) as source,
+                    closing(sqlite3.connect(staged)) as destination,
+                    destination,
+                ):
                     source.backup(destination)
                     # Preserve events after the selected backup as recovery history.
-                    existing = {tuple(row) for row in destination.execute("SELECT occurred_at,actor,action,day,revision,details_json FROM audit_events")}
+                    existing = {
+                        tuple(row)
+                        for row in destination.execute(
+                            "SELECT occurred_at,actor,action,day,revision,details_json FROM audit_events"
+                        )
+                    }
                     for event in prior_events:
-                        values = tuple(event[key] for key in ("occurred_at", "actor", "action", "day", "revision", "details_json"))
+                        values = tuple(
+                            event[key]
+                            for key in (
+                                "occurred_at",
+                                "actor",
+                                "action",
+                                "day",
+                                "revision",
+                                "details_json",
+                            )
+                        )
                         if values not in existing:
-                            destination.execute("INSERT INTO audit_events(occurred_at,actor,action,day,revision,details_json) VALUES(?,?,?,?,?,?)", values)
-                    self._event(destination, actor, "restore", backup=target.name, safety_backup=safety.name)
+                            destination.execute(
+                                "INSERT INTO audit_events(occurred_at,actor,action,day,revision,details_json) VALUES(?,?,?,?,?,?)",
+                                values,
+                            )
+                    self._event(
+                        destination,
+                        actor,
+                        "restore",
+                        backup=target.name,
+                        safety_backup=safety.name,
+                    )
                 self._verify_backup(staged)
                 os.replace(staged, self.path)
             finally:
@@ -546,6 +823,7 @@ class LedgerStore:
 
 class _ClosingConnection:
     """sqlite3's native context manager commits but does not close connections."""
+
     def __init__(self, connection):
         self.connection = connection
 
@@ -565,6 +843,7 @@ class _ClosingConnection:
 def collect_closed(folder, start, end):
     """Final reports use published revisions, even if Excel has been edited/deleted."""
     from datetime import timedelta
+
     folder = Path(folder).resolve()
     start, end = date.fromisoformat(str(start)), date.fromisoformat(str(end))
     if start > end:
@@ -572,8 +851,11 @@ def collect_closed(folder, start, end):
     store = LedgerStore(folder.parent, create=False)
     books = store.published_books(start, end)
     published = {book["day"] for book in books}
-    unclosed = {row['source_name'] for row in store.status()
-                if str(start) <= row['day'] <= str(end) and row['published_revision'] is None}
+    unclosed = {
+        row["source_name"]
+        for row in store.status()
+        if str(start) <= row["day"] <= str(end) and row["published_revision"] is None
+    }
     for path in folder.glob("Daily_*.xlsx"):
         match = DAILY_NAME.fullmatch(path.name)
         if match:
@@ -584,17 +866,27 @@ def collect_closed(folder, start, end):
             if start <= day <= end and str(day) not in published:
                 unclosed.add(path.name)
     if unclosed:
-        raise ValueError("Final reports require closed days. Import, review and close: " + ", ".join(sorted(unclosed)))
+        raise ValueError(
+            "Final reports require closed days. Import, review and close: "
+            + ", ".join(sorted(unclosed))
+        )
     if not books:
         raise ValueError("No closed daily records found in the selected date range.")
-    missing = [str(start + timedelta(days=i)) for i in range((end - start).days + 1)
-               if str(start + timedelta(days=i)) not in published]
+    missing = [
+        str(start + timedelta(days=i))
+        for i in range((end - start).days + 1)
+        if str(start + timedelta(days=i)) not in published
+    ]
     return books, missing, []
 
 
 def main():
-    parser = argparse.ArgumentParser(description="SmartBus Professional local accounting ledger")
-    parser.add_argument("--root", type=Path, help="Project folder (defaults to this application)")
+    parser = argparse.ArgumentParser(
+        description="SmartBus Professional local accounting ledger"
+    )
+    parser.add_argument(
+        "--root", type=Path, help="Project folder (defaults to this application)"
+    )
     sub = parser.add_subparsers(dest="command", required=True)
     sub.add_parser("status")
     imp = sub.add_parser("import")
@@ -614,7 +906,7 @@ def main():
     audit.add_argument("--limit", type=int, default=100)
     args = parser.parse_args()
     try:
-        store = LedgerStore(args.root, create=args.command != 'restore')
+        store = LedgerStore(args.root, create=args.command != "restore")
         if args.command == "status":
             result = store.status()
         elif args.command == "import":

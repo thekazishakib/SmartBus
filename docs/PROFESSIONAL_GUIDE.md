@@ -1,12 +1,14 @@
-# SmartBus 1.2.0 operating guide
+# SmartBus 1.2.1 operating guide
 
 This is the current guide for SmartBus's English-only interface, Excel workbooks, reports and SQLite ledger.
 
 ## Install and start
 
-Use a writable project folder on one Windows computer with Python 3.11+, Microsoft Excel and Microsoft Edge. Python dependencies are standard-library only. The application uses system fonts and needs no font installation. R analysis is optional.
+Use a writable project folder on one Windows computer with Python 3.11+ and Microsoft Excel. Microsoft Edge is optional for automatic PDF printing; browser Print / Save as PDF is the portable reporting method. The application and unittest suite use only the Python standard library. Ruff is a separate development dependency. The application uses system fonts and needs no font installation. R analysis is optional.
 
 Run `launch.bat` or `python control_panel.py`. Keep the launcher open. Stop the server by closing it or pressing Ctrl+C in its terminal. Run `python control_panel.py --no-browser` to avoid opening the browser automatically, then use the printed local address.
+
+Saved files and folders use the operating system's default opener. If opening fails, the panel shows the saved path so you can open it manually. macOS and Linux launch commands are supported by the helper, but the full desktop workflow has not been verified there.
 
 The ledger is stored at `data/ledger.sqlite3`; database backups are under `backups/` and source-workbook recovery copies are under `backups/workbooks/`. Use one running application against a ledger.
 
@@ -127,9 +129,11 @@ Use your computer's access controls for the project and backups. Confirm account
 ## Developer checks
 
 ```text
+python -m pip install -r requirements-dev.txt
+ruff format --check .
+ruff check .
 python -m unittest discover -s . -p "test_*.py" -v
 python -m compileall -q .
 ```
 
 See [contributor guidance](../CONTRIBUTING.md). Original project material is released under the MIT License; see LICENSE and THIRD_PARTY_NOTICES.md.
-

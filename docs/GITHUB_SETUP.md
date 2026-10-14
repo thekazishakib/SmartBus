@@ -50,7 +50,7 @@ Alternatively, open **Actions → Build release archive → Run workflow** after
 
 ## Publish a release when ready
 
-In GitHub's **Releases**, draft a release with tag `v1.2.0`. Use the current release notes, attach the ZIP and checksum from `dist/`, and inspect the draft before publishing it. No tag or remote release has been created by this file-preparation task.
+In GitHub's **Releases**, draft a release with tag `v1.2.1`. Use the current release notes, attach the ZIP and checksum from `dist/`, and inspect the draft before publishing it. No tag or remote release has been created by this file-preparation task.
 
 ## License and attribution
 

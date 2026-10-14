@@ -86,15 +86,15 @@ Coach mappings and editable route fares are maintained in the daily workbook.
 | Local control panel | HTML, CSS, vanilla JavaScript | Workbook actions, review, closure and exports |
 | PDF | Browser Print / Save as PDF; optional Edge headless print | Save the printable report as a PDF |
 | Optional analysis | R | Analyze exported CSV data |
-| CI | GitHub Actions | Automated tests and Python compilation |
+| CI | GitHub Actions | Ruff formatting/lint, automated tests and Python compilation |
 
-There are no third-party Python package dependencies. External applications keep their own licenses; see [third-party notices](THIRD_PARTY_NOTICES.md).
+The application and unittest suite have no third-party Python package dependencies. Ruff is a separate development dependency for formatting and lint checks. External applications keep their own licenses; see [third-party notices](THIRD_PARTY_NOTICES.md).
 
 ## Getting started
 
 ### Requirements
 
-- Windows for the ordinary desktop workflow.
+- Windows for the established desktop workflow. OS-specific file opening also supports macOS and Linux commands; the full desktop workflow has not been verified there.
 - Python 3.11 or later.
 - Microsoft Excel for editing workbooks.
 - A browser with Print / Save as PDF; Microsoft Edge for optional automatic PDF output.
@@ -193,6 +193,9 @@ SmartBus/
 ├── control_panel.py             # Local operator controls
 ├── counter_accounting.py        # Accounting and reconciliation
 ├── daily_system.py              # Daily workbooks and printable/PDF reports
+├── values.py                    # Shared money/date helpers
+├── xlsx_io.py                   # Shared workbook XML reading
+├── platform_open.py             # OS-aware saved-file/folder opening
 ├── ledger_store.py              # SQLite revisions, closure, audit and recovery
 ├── period_export.py             # Combined Excel reports
 ├── report_layout.py             # Printable report layout
@@ -208,6 +211,9 @@ SmartBus/
 ├── daily/                       # Real daily inputs, ignored by Git
 ├── reports/                     # Real exports, ignored by Git
 ├── test_*.py                    # Standard-library automated tests
+├── requirements-dev.txt         # Pinned development checks
+├── ruff.toml                    # Python formatting/lint configuration
+├── AGENTS.md                    # Repository guidance for coding agents
 ├── LICENSE                      # MIT License
 └── THIRD_PARTY_NOTICES.md        # External tools and attribution
 ```
@@ -228,12 +234,15 @@ SmartBus/
 ## Tests and release checks
 
 ```text
+python -m pip install -r requirements-dev.txt
+ruff format --check .
+ruff check .
 python -m unittest discover -s . -p "test_*.py" -v
 python -m compileall -q .
 python tools/package_release.py
 ```
 
-CI is configured for Python 3.11 and 3.13 on Windows and Ubuntu. See [delivery verification](docs/DELIVERY_VERIFICATION.md) for the actual local results and desktop/PDF limitations. Remote CI results are established after the repository is uploaded and its jobs run.
+Development dependencies are needed only for formatting/lint checks. Use `ruff format .` to apply formatting and review any automatic lint fixes. CI checks formatting, lint, tests and compilation on Python 3.11 and 3.13 on Windows and Ubuntu. See [delivery verification](docs/DELIVERY_VERIFICATION.md) for the actual local results and desktop/PDF limitations. Remote CI results are established after the repository is uploaded and its jobs run.
 
 ## GitHub and releases
 

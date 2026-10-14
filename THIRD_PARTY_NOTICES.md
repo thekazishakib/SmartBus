@@ -13,7 +13,15 @@ SmartBus's original source, documentation, workbook templates and demonstration 
 | Browser and operating-system fonts | Panel, printable reports and workbook text | Uses available system fonts, including Arial and Segoe UI. No font binaries are distributed. |
 | R | Optional analysis with `analyze.R` | Installed separately; not required. See [R licensing](https://www.r-project.org/Licenses/). |
 
-There are **no third-party Python package requirements** for normal operation or tests. The interface uses plain HTML, CSS and JavaScript; no frontend framework, CDN, analytics service or remote database is required.
+There are **no third-party Python package requirements** for normal operation or the unittest suite. Formatting and lint checks have a separate development dependency, listed below. The interface uses plain HTML, CSS and JavaScript; no frontend framework, CDN, analytics service or remote database is required.
+
+## Development checks
+
+| Tool | Use in SmartBus | Upstream license |
+| --- | --- | --- |
+| Ruff 0.17.0 | Python formatting and lint checks; installed through `requirements-dev.txt` locally and in CI | [MIT License](https://github.com/astral-sh/ruff/blob/0.17.0/LICENSE), copyright Charles Marsh |
+
+Ruff is not bundled and is not required to run the application or unittest suite. Its license remains separate from SmartBus's copyright.
 
 ## GitHub workflow actions
 

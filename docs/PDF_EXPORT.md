@@ -65,6 +65,7 @@ Excel exports the workbook's current saved/calculated view. A final SmartBus pri
 | --- | --- |
 | No closed records | Import, review and close the relevant daily files. |
 | Blank received deposits block review | Enter an explicit `0` if no money was received; otherwise enter the known receipt. |
+| File was saved but did not open automatically | Open the saved path shown by the panel manually. A missing desktop opener does not discard the export. |
 | PDF destination missing | Look for Microsoft Print to PDF or use a browser that offers Save as PDF. |
 | Columns or charts cut off | Use Legal/Portrait for the SmartBus printable layout; use the appropriate landscape print settings for wide Excel sheets. |
 | Browser headers duplicate the report | Disable browser headers and footers in print settings. |
