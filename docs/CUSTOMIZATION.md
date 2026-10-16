@@ -2,7 +2,7 @@
 
 ## Project identity and report defaults
 
-Edit the root `project.json` in a text editor. Keep valid JSON and reload the browser page after saving.
+Open **Customize** in the control panel, edit the supported fields, and choose **Save & reload workspace**. The server validates the entire profile before atomically saving `project.json`. You can also edit that file in a text editor and reload the page.
 
 | Field | What it changes |
 | --- | --- |
@@ -16,6 +16,8 @@ Edit the root `project.json` in a text editor. Keep valid JSON and reload the br
 | `accent_color` | Main panel color; use a six-digit hex value such as `#22675f` |
 
 The company field in the report form can override the configured default for that export. These settings do not rewrite historical ledger values or change commission/capacity rules.
+
+Company names allow up to 120 characters and default operators up to 80. Other text fields allow up to 160. Unknown settings and invalid colors are rejected before saving. A separate workstation launched with `--root` has its own profile and data folder.
 
 `project.json` is public project metadata. Do not put passwords, account numbers or private contact information in it.
 

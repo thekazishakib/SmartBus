@@ -101,6 +101,63 @@ class ControlPanelTests(unittest.TestCase):
                 200,
             )
 
+    def test_new_read_endpoints_require_token_and_validate_filters(self):
+        for path in (
+            "/api/insights?start=2025-10-01&end=2025-10-31",
+            "/api/profile",
+            "/api/benchmark",
+        ):
+            self.assertEqual(self.request(path=path)[0], 403)
+        headers = {"X-SmartBus-Token": self.server.token}
+        self.assertEqual(self.request(path="/api/profile", headers=headers)[0], 200)
+        for query in (
+            "",
+            "?start=2025-10-01&end=2025-10-31&end=2025-11-01",
+            "?start=2025-10-01&end=2025-10-31&unexpected=1",
+            "?start=2025-11-01&end=2025-10-01",
+        ):
+            self.assertEqual(
+                self.request(path="/api/insights" + query, headers=headers)[0], 400
+            )
+        status, _, body = self.request(
+            path="/api/insights?start=2025-10-01&end=2025-10-31", headers=headers
+        )
+        self.assertEqual(status, 200)
+        self.assertEqual(json.loads(body)["days"], 0)
+
+    def test_scenario_is_validated_without_ledger_mutation(self):
+        status, _, body = self.post(
+            {
+                "action": "scenario",
+                "seats": 40,
+                "fare": "500.00",
+                "counter_type": "Commission",
+            }
+        )
+        self.assertEqual(status, 200)
+        self.assertEqual(json.loads(body)["data"]["due"], "18000.00")
+        self.assertEqual(
+            self.post(
+                {"action": "scenario", "seats": 63, "fare": 500, "counter_type": "Own"}
+            )[0],
+            400,
+        )
+        self.server.ledger.assert_not_called()
+
+    def test_profile_editor_rejects_financial_rules_and_saves_branding(self):
+        status, _, _ = self.post(
+            {"action": "save_profile", "profile": {"commission": 2}}
+        )
+        self.assertEqual(status, 400)
+        status, _, body = self.post(
+            {"action": "save_profile", "profile": {"company_name": "Example Campus"}}
+        )
+        self.assertEqual(status, 200)
+        self.assertEqual(json.loads(body)["profile"]["company_name"], "Example Campus")
+        self.assertEqual(
+            control_panel.load_profile(self.root)["company_name"], "Example Campus"
+        )
+
     def test_external_origin_and_rebinding_host_are_rejected(self):
         for headers in (
             {"Origin": "https://example.com"},

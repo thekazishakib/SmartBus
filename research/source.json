@@ -1,0 +1,26 @@
+{
+  "title": "CTA - Ridership - Bus Routes - Daily Totals by Route",
+  "publisher": "Chicago Transit Authority",
+  "url": "https://data.cityofchicago.org/Transportation/CTA-Ridership-Bus-Routes-Daily-Totals-by-Route/jyb9-n7fm",
+  "geography": "Chicago, Illinois, United States",
+  "retrieved_at": "2026-10-16T15:11:58.155537+00:00",
+  "license": "SEE_TERMS_OF_USE (City of Chicago portal terms)",
+  "terms_url": "https://www.chicago.gov/city/en/narr/foia/data_disclaimer.html",
+  "dataset_id": "jyb9-n7fm",
+  "requested_period": {
+    "start": "2025-10-01",
+    "end": "2025-11-30"
+  },
+  "query_urls": [
+    "https://data.cityofchicago.org/resource/jyb9-n7fm.csv?$where=date%20%3E%3D%20%272025-10-01T00:00:00%27%20AND%20date%20%3C%20%272025-12-01T00:00:00%27&$order=date,route&$limit=10000"
+  ],
+  "rows": 6972,
+  "sha256": "a9e747d2efc32eb31ffa57f3b5122b2574a3bd8e0d76f8f0adab40b5c46d7b78",
+  "grain": "One observed date and bus route; rides are boardings",
+  "daytypes": {
+    "W": "Weekday",
+    "A": "Saturday",
+    "U": "Sunday/Holiday"
+  },
+  "snapshot_note": "Original API CSV retained. Selected historical two-month snapshot, not a live feed."
+}

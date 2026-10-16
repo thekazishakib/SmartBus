@@ -20,6 +20,8 @@ BLOCKED = {
     "data",
     "backups",
     "demo_workspace",
+    "analysis",
+    "work",
     "dist",
     ".pytest_cache",
     ".ruff_cache",
@@ -30,7 +32,7 @@ def included(path, root):
     relative = path.relative_to(root)
     if any(part in BLOCKED for part in relative.parts):
         return False
-    if relative.parts[0] in {"daily", "reports"}:
+    if any(part in {"daily", "reports"} for part in relative.parts[:-1]):
         return path.name == ".gitkeep"
     return not (
         path.name.startswith((".env", "~$"))

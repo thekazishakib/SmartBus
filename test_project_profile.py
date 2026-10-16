@@ -4,7 +4,7 @@ import unittest
 from pathlib import Path
 
 from control_panel import render_page
-from project_profile import DEFAULTS, load_profile
+from project_profile import DEFAULTS, load_profile, save_profile
 
 
 class ProjectProfileTests(unittest.TestCase):
@@ -63,10 +63,34 @@ class ProjectProfileTests(unittest.TestCase):
         for values in (
             {"github_username": "../owner"},
             {"repository_name": "https://github.com/project"},
+            {"repository_name": "."},
+            {"repository_name": ".."},
         ):
             self.write(values)
             with self.assertRaises(ValueError):
                 load_profile(self.root)
+
+    def test_invalid_editor_save_preserves_existing_profile(self):
+        prior = save_profile({"company_name": "Example Transport"}, self.root)
+        for values in ({"commission": 999}, {"accent_color": "red;"}, None):
+            with self.assertRaises(ValueError):
+                save_profile(values, self.root)
+            self.assertEqual(load_profile(self.root), prior)
+        self.assertFalse(list(self.root.glob(".project_*.json")))
+
+    def test_editor_save_roundtrips_validated_identity(self):
+        result = save_profile(
+            DEFAULTS | {"company_name": "Campus Transport", "accent_color": "#183A4F"},
+            self.root,
+        )
+        self.assertEqual(load_profile(self.root), result)
+        self.assertEqual(result["author"], "Kazi Shakib")
+
+    def test_profile_limits_match_operator_actions_and_report_export(self):
+        for field, limit in (("company_name", 120), ("default_operator", 80)):
+            save_profile({field: "x" * limit}, self.root)
+            with self.assertRaises(ValueError):
+                save_profile({field: "x" * (limit + 1)}, self.root)
 
 
 if __name__ == "__main__":

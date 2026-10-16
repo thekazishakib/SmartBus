@@ -1,5 +1,16 @@
 # Changelog
 
+## 1.3.0 - 2026-10-16
+
+- Added a professional local dashboard with closed-record insights, weighted occupancy, route trends and separate counter outstanding/extra receipts.
+- Added hypothetical seat/fare/counter-type planning and validated branding controls. Planning inputs do not alter accepted transactions or fixed financial rules.
+- Added reproducible official CTA public-ridership research, a historical two-month snapshot, provenance/checksum manifest, summaries and a chronological holdout comparison with a last-observed baseline.
+- Added a separate advanced Excel public-data analysis workbook with source notes and measured forecast results. The historical route/daytype mean underperformed the baseline on the included holdout; no forecasting improvement or financial outcome is claimed.
+- Extended the optional base-R script with strict ridership validation, chronological forecasts, coverage/exclusion reporting, weekday/daytype summaries and chart output; retained financial trips CSV analysis and added unknown-receipt counts.
+- Added an undergraduate portfolio guide with Python/Excel learning topics, reproducible commands, an adaptable authorship statement, evidence exercises and staged extensions.
+- Added a deterministic 1–31 day fictional demo, isolated-workspace launch support, source/schema documentation and Windows/Linux verification workflows. Release packaging excludes daily records, private reports and analysis outputs even inside nested workspaces.
+- Retained the fictional financial demonstration, Decimal accounting, review/close workflow, accepted closed snapshots and single-workstation scope. Public Chicago boardings are separate from company accounts and are not evidence of Bangladesh operating demand.
+
 ## 1.2.1 - 2026-10-14
 
 - Final distribution preparation: clarified AI assistance and the owner's learning context, added an owner guide and browser publishing instructions, and recorded fresh final-package checks. Application code and workbook fixtures remain unchanged in this preparation.

@@ -1,6 +1,6 @@
 # Owner learning and showcase guide
 
-SmartBus 1.2.1 is a finance automation project by Kazi Shakib. This guide builds on an Excel background and introduces the Python needed to understand and maintain the project. It is a practice plan, not evidence that the tasks below have already been completed.
+SmartBus 1.3.0 is a finance automation project by Kazi Shakib. This guide builds on an Excel background and introduces the Python needed to understand and maintain the project. It is a practice plan, not evidence that the tasks below have already been completed.
 
 ## Describe the project accurately
 
@@ -62,7 +62,7 @@ For each meaningful update, record the date, question, your decision, AI assista
 ## After publication
 
 - Check GitHub Actions results, README images and a fresh download of the release.
-- Keep v1.2.1 as the published baseline. Later changes need accurate changelog entries and new version numbers where appropriate.
+- Keep v1.3.0 as the published baseline. Later changes need accurate changelog entries and new version numbers where appropriate.
 - Learn the existing finance model and get feedback before expanding features.
 - Use fictional or explicitly authorized, appropriately anonymized examples publicly. Access to company records does not imply permission to publish them.
 

@@ -19,6 +19,10 @@ class ReleaseToolsTests(unittest.TestCase):
                 "reports/.gitkeep",
                 "daily/real.xlsx",
                 "reports/private.html",
+                "portfolio_demo/daily/nested_private.xlsx",
+                "portfolio_demo/reports/nested_private.json",
+                "analysis/private_export.csv",
+                "research/public.csv",
                 "data/ledger.sqlite3",
                 "backups/private.xlsx",
                 ".env.local",
@@ -34,6 +38,7 @@ class ReleaseToolsTests(unittest.TestCase):
                 self.assertIn("SmartBus/LICENSE", names)
                 self.assertIn("SmartBus/daily/.gitkeep", names)
                 self.assertIn("SmartBus/RELEASE_MANIFEST.json", names)
+                self.assertIn("SmartBus/research/public.csv", names)
                 for suffix in (
                     "real.xlsx",
                     "private.html",
@@ -42,6 +47,9 @@ class ReleaseToolsTests(unittest.TestCase):
                     ".env.local",
                     "private.pyc",
                     "private.cache",
+                    "nested_private.xlsx",
+                    "nested_private.json",
+                    "private_export.csv",
                 ):
                     self.assertFalse(any(name.endswith(suffix) for name in names))
             self.assertTrue(output.with_suffix(".sha256").exists())

@@ -40,3 +40,11 @@ OpenAI ChatGPT/Codex assisted with implementation, debugging, tests and document
 Images in `assets/` show this project's fictional examples. Workbook previews are renders of the actual demonstration file. Workflow illustrations explain the review and export steps; they are not live browser screenshots. They contain no club logo, Shohoz branding, real passenger data or third-party screenshots. Original project screenshots and illustrations are included under MIT.
 
 Sample staff names, phone numbers, companies and amounts are fictional. Product names and trademarks remain the property of their respective owners; this project does not imply endorsement.
+
+## Public transit research data
+
+`research/cta_ridership.csv` contains a selected historical snapshot of **CTA - Ridership - Bus Routes - Daily Totals by Route**, published by the Chicago Transit Authority through the [City of Chicago Data Portal](https://data.cityofchicago.org/Transportation/CTA-Ridership-Bus-Routes-Daily-Totals-by-Route/jyb9-n7fm). The dataset metadata specifies `SEE_TERMS_OF_USE`; see the [portal terms and disclaimer](https://www.chicago.gov/city/en/narr/foia/data_disclaimer.html). This data retains its source terms and is not relicensed under SmartBus's MIT license.
+
+The included period is October 1 through November 30, 2025. `research/source.json` records the query URL, retrieval timestamp, schema, attribution and SHA-256 checksum. Research summaries, predictions and the Excel analysis workbook are derived from this snapshot and retain that attribution. CTA does not endorse this project. Rides are observed Chicago boardings, not unique passengers, Bangladesh traffic, fare revenue, vehicle capacity or GPS observations.
+
+The financial demonstration and the public ridership research are separate datasets. The workbook is built with OpenAI's artifact tool during development; that tool is not required to use Excel, run the local application, refresh the CSV snapshot or reproduce the Python/R research analysis.

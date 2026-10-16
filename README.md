@@ -4,15 +4,17 @@
 
 <p align="center">Daily trips, counter collections and revenue reconciliation</p>
 
-<p align="center"><strong>English only · Python 3.11+ · Local workstation · MIT License</strong></p>
+<p align="center"><strong>Version 1.3.0 · Python 3.11+ · Excel · Local workstation · MIT License</strong></p>
 
-<p align="center"><a href="docs/PDF_EXPORT.md">Export to PDF</a> · <a href="docs/PROFESSIONAL_GUIDE.md">Operating guide</a> · <a href="docs/CUSTOMIZATION.md">Customize</a> · <a href="docs/GITHUB_SETUP.md">GitHub setup</a></p>
+<p align="center"><a href="docs/PORTFOLIO_GUIDE.md">Portfolio and learning guide</a> · <a href="docs/PROFESSIONAL_GUIDE.md">Operating guide</a> · <a href="docs/CUSTOMIZATION.md">Customize</a> · <a href="docs/PDF_EXPORT.md">Export to PDF</a></p>
 
 ## Project overview
 
 SmartBus is a practical finance automation project for daily bus trips and counter accounts. It connects trip records with ticket sales, commission, deposits and outstanding balances, then preserves reviewed results in a local ledger.
 
 The project uses Excel for familiar daily data entry, Python for accounting and reporting, SQLite for versioned records, and a small HTML/CSS/JavaScript control panel for the operator workflow. It runs on one computer and does not need an online account or a cloud database.
+
+For an undergraduate portfolio, a separate public-data research area adds official CTA ridership analysis, a chronological forecast comparison and an advanced Excel analysis workbook. The public Chicago data demonstrates a reproducible research method; the financial example uses fictional Tk accounts. Python and Excel are the core learning path, with R available as an optional independent analysis.
 
 **Created and maintained by [Kazi Shakib](https://github.com/thekazishakib).**
 
@@ -26,7 +28,51 @@ The project uses Excel for familiar daily data entry, Python for accounting and 
 - **Reasoned corrections:** keep the old closed revision until a replacement has been imported, reviewed and closed.
 - **Report exports:** date-range Excel reports and a browser-printable report with a **Print / Save as PDF** button. Automatic Edge PDF export is also available.
 - **Recovery and traceability:** source backups, verified ledger backups, restore, stable trip IDs and local audit events.
-- **Editable branding:** company, project name, operator, author and accent color in `project.json`; editable README template.
+- **Closed-record insights:** reporting-date filters, route trends, weighted occupancy and separate counter shortages/extra receipts from authoritative closed snapshots.
+- **Planning scenarios:** vary seats, fare and counter type to explore hypothetical revenue and commission without creating financial transactions.
+- **Public-data research:** official CTA snapshot, source/checksum manifest, reproducible Python summaries and a training-only forecast baseline comparison.
+- **Advanced Excel analysis:** a separate public-ridership workbook with formulas, charts, source notes and evaluation results.
+- **Editable branding:** validated Customize controls for supported `project.json` settings, plus an editable README template.
+- **Reproducible demonstration:** prepare 1–31 fictional closed days, including a 14-day showcase, without overwriting existing records.
+
+See the [architecture and data dictionary](docs/ARCHITECTURE.md), [verification record](docs/VALIDATION_1.3.md) and [learning path](docs/LEARNING_PATH.md).
+
+### Local operations workstation
+
+Actual browser capture of the 14-day fictional demonstration. Closed financial records, route/counter comparisons, planning, public-data research, recovery and customization share the local panel.
+
+![SmartBus local operations workstation](assets/09-workstation.jpg)
+
+## Public-data research and learning
+
+The included [CTA research snapshot](research/cta_ridership.csv) covers **2025-10-01 to 2025-11-30**: **6,972 observed route/date rows, 127 routes, 61 dates and 33,591,684 rides/boardings**. Source: [Chicago Transit Authority / City of Chicago Data Portal](https://data.cityofchicago.org/Transportation/CTA-Ridership-Bus-Routes-Daily-Totals-by-Route/jyb9-n7fm). The [source manifest](research/source.json) records retrieval details, query and checksum; external data retains the publisher's terms.
+
+The final seven observed dates are held out: **2025-11-24 to 2025-11-30**. Training ends on **2025-11-23**. A historical mean for each route/daytype is compared with the last observed training value for that route, using the same **769** eligible records with **0** exclusions. The mean model's MAE is **1,291.45 rides per route/day**, versus **1,026.95** for the baseline; it **underperformed the baseline** in this holdout. Both forecasts use training records only.
+
+This result is a useful starting point for investigating better methods, not evidence of improved demand forecasting. The dataset provides boardings, not seat capacity, GPS, fares, receipts or Bangladesh operations. Missing route-days are not filled with zero. One short backtest does not establish future accuracy.
+
+Reproduce the Python results offline:
+
+```text
+python ridership.py analyze --folder research
+```
+
+Inspect the [benchmark](research/benchmark.json), [daily summary](research/daily_summary.csv), [route summary](research/route_summary.csv), [predictions](research/forecast_predictions.csv) and [Excel analysis workbook](research/SmartBus_Public_Data_Analysis.xlsx). The workbook is separate from financial entry templates; its notes explain formulas and assumptions.
+
+To download a new public snapshot while preserving the bundled data:
+
+```text
+python ridership.py download --start 2025-10-01 --end 2025-11-30 --destination research_refresh
+```
+
+Optional independent analysis after installing R:
+
+```text
+Rscript analyze.R --ridership research/cta_ridership.csv analysis/cta
+Rscript analyze.R reports/YOUR_REPORT_trips.csv analysis/accounts
+```
+
+Replace `YOUR_REPORT_trips.csv` with a real report-export filename. R generates summaries, evaluation details and PDF charts. R is optional and separately installed; inclusion of the script does not establish that it ran on your computer. See the [portfolio guide](docs/PORTFOLIO_GUIDE.md) for methodology, evidence, an honest presentation template and staged extensions, and the [learning path](docs/LEARNING_PATH.md) for courses and a proposed schedule.
 
 ## Preview, part by part
 
@@ -81,16 +127,24 @@ Coach mappings and editable route fares are maintained in the daily workbook.
 | Layer | Technology | Purpose |
 | --- | --- | --- |
 | Accounting and reporting | Python standard library | Validation, decimal money arithmetic, workbook XML, CSV and report generation |
-| Data entry | Microsoft Excel `.xlsx` | Daily trips, collections and master lists |
+| Data entry and analysis | Microsoft Excel `.xlsx` | Daily trips, collections, master lists and a separate public-data analysis workbook |
 | Ledger | SQLite through Python `sqlite3` | Versioned snapshots, audit events and recovery |
 | Local control panel | HTML, CSS, vanilla JavaScript | Workbook actions, review, closure and exports |
 | PDF | Browser Print / Save as PDF; optional Edge headless print | Save the printable report as a PDF |
-| Optional analysis | R | Analyze exported CSV data |
+| Public-data research | Python standard library | Official-data download, validation, provenance, summaries and chronological forecast comparison |
+| Optional independent analysis | Base R | Analyze financial exports or public ridership CSV data |
 | CI | GitHub Actions | Ruff formatting/lint, automated tests and Python compilation |
 
 The application and unittest suite have no third-party Python package dependencies. Ruff is a separate development dependency for formatting and lint checks. External applications keep their own licenses; see [third-party notices](THIRD_PARTY_NOTICES.md).
 
 ## Getting started
+
+For a fictional demonstration on Windows, double-click **`launch_demo.bat`** after installing Python 3.11+. It creates a separate 14-day demo workspace, opens the local dashboard, and leaves your normal working ledger separate. Alternatively:
+
+```text
+python demo.py --folder portfolio_demo --days 14
+python control_panel.py --root portfolio_demo
+```
 
 ### Requirements
 
@@ -161,7 +215,7 @@ The scope is revenue and collection reconciliation. Operating expenses, payroll 
 
 ## Customization
 
-Edit `project.json` for project identity and defaults:
+Use **Customize** in the control panel, or edit `project.json`, for supported project identity and defaults:
 
 ```json
 {
@@ -176,7 +230,7 @@ Edit `project.json` for project identity and defaults:
 }
 ```
 
-Reload the browser page after editing these settings. Report company defaults follow the profile; you can override the company in the export form.
+Reload the browser page after editing the JSON file. Report company defaults follow the profile; you can override the company in the export form. Branding changes do not alter capacity, commissions or closed financial records. The **Planning** view uses hypothetical inputs and does not reconfigure those accounting rules.
 
 For repeatable README customization, edit `docs/README.template.md`, then run:
 
@@ -201,11 +255,15 @@ SmartBus/
 ├── report_layout.py             # Printable report layout
 ├── project_profile.py           # Validated profile loading
 ├── project.json                 # Editable identity and report defaults
+├── insights.py                  # Closed-record analysis and planning calculations
+├── ridership.py                 # Reproducible official public-data research
+├── analyze.R                    # Optional base-R accounts/ridership analysis
 ├── demo.py                      # Disposable end-to-end demonstration
 ├── Daily_Template_en.xlsx        # Live daily template; configure real fares
 ├── Demo_2026-10-12_en.xlsx        # Fictional example inputs
 ├── assets/                      # Part-by-part images and illustrations
 ├── docs/                        # Guides, README template and report example
+├── research/                    # Public snapshot, provenance, benchmark and analysis workbook
 ├── tools/                       # README generation and release packaging
 ├── .github/                     # CI and contribution templates
 ├── daily/                       # Real daily inputs, ignored by Git
@@ -252,13 +310,13 @@ The [GitHub setup guide](docs/GITHUB_SETUP.md) covers repository upload, topics,
 
 Developed by Kazi Shakib with support from ChatGPT/Codex, an AI assistant. I guided the project direction and feature choices; the assistant helped with code generation, debugging, tests and documentation. No real-company adoption, financial outcomes or time savings are claimed by the demonstration data.
 
-See the [owner learning and showcase guide](docs/OWNER_GUIDE.md) for a practice demo, a focused Python learning path and a way to document personal contributions. The [final package verification](docs/FINAL_PACKAGE_VERIFICATION.md) distinguishes freshly rerun checks from desktop steps still requiring manual acceptance.
+See the [portfolio and learning guide](docs/PORTFOLIO_GUIDE.md) for the research method, a Python/Excel learning path, practical exercises, contribution evidence and an adaptable project narrative. The earlier [owner guide](docs/OWNER_GUIDE.md) explains the financial demonstration. The [final package verification](docs/FINAL_PACKAGE_VERIFICATION.md) distinguishes freshly rerun checks from desktop steps still requiring manual acceptance.
 
 Future work may add direct browser data entry and a dedicated Trips interface. Those features are not included in this release.
 
 ## Author
 
-**Kazi Shakib**  
+**Kazi Shakib**
 [GitHub](https://github.com/thekazishakib)
 
 ## License

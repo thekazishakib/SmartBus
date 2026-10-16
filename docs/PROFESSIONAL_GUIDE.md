@@ -1,4 +1,6 @@
-# SmartBus 1.2.1 operating guide
+# SmartBus 1.3.0 operating guide
+
+The local panel now has Overview, Daily operations, Reports & exports, Scenario planner, Public data lab, Recovery & activity, and Customize views. Overview reads closed ledger revisions only. Scenario planning creates no transaction. Public data lab uses a separate official Chicago ridership snapshot. See [the portfolio guide](PORTFOLIO_GUIDE.md) for research methods and [the learning path](LEARNING_PATH.md) for courses.
 
 This is the current guide for SmartBus's English-only interface, Excel workbooks, reports and SQLite ledger.
 
